@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>一人公司SOP生成器 v2</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <div class="max-w-5xl mx-auto p-4 md:p-6">
+    <div class="text-center mb-6">
+      <h1 class="text-3xl font-bold mb-2"><i class="fa fa-cogs text-cyan-600"></i> 一人公司SOP生成器 v2</h1>
+      <p class="text-gray-500">根据业务类型、规模、阶段，自动生成标准化操作流程</p>
+    </div>
+
+    <!-- 配置面板 -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+      <h2 class="font-bold text-lg mb-4"><i class="fa fa-sliders text-cyan-600"></i> 配置你的公司</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">业务类型</label>
+          <select id="bizType" class="w-full border rounded px-3 py-2">
+            <option value="ecommerce">电商/实物产品</option>
+            <option value="service">服务/咨询</option>
+            <option value="content">内容/自媒体</option>
+            <option value="tool">工具/SaaS</option>
+            <option value="education">教育/培训</option>
+            <option value="retail">实体店/餐饮</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">团队规模</label>
+          <select id="teamSize" class="w-full border rounded px-3 py-2">
+            <option value="1">仅自己（一人公司）</option>
+            <option value="2">1-2人（夫妻档/合伙人）</option>
+            <option value="3">3-5人（小团队）</option>
+            <option value="10">5人以上（成长型）</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">发展阶段</label>
+          <select id="stage" class="w-full border rounded px-3 py-2">
+            <option value="startup">起步期（0-6月 验证模式）</option>
+            <option value="growth">成长期（6-18月 快速扩张）</option>
+            <option value="stable">稳定期（18月+ 优化效率）</option>
+          </select>
+        </div>
+      </div>
+      <div class="mt-3">
+        <label class="block text-sm font-medium mb-1">公司/品牌名称</label>
+        <input type="text" id="companyName" class="w-full border rounded px-3 py-2" placeholder="我的工作室" value="我的工作室">
+      </div>
+      <button onclick="generateSOP()" class="w-full bg-cyan-600 text-white py-3 mt-4 rounded-lg hover:bg-cyan-700 text-lg font-bold">
+        <i class="fa fa-magic"></i> 生成完整SOP手册
+      </button>
+    </div>
+
+    <!-- 模块选择 -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+      <h2 class="font-bold text-lg mb-4"><i class="fa fa-check-square-o text-green-600"></i> 选择需要包含的SOP模块</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <label class="flex items-center gap-2 p-2 bg-gray-50 rounded hover:bg-green-50 cursor-pointer"><input type="checkbox" id="modCs" checked><span class="text-sm">客服与服务</span></label>
+        <label class="flex items-center gap-2 p-2 bg-gray-50 rounded hover:bg-green-50 cursor-pointer"><input type="checkbox" id="modFinance" checked><span class="text-sm">财务与账务</span></label>
+        <label class="flex items-center gap-2 p-2 bg-gray-50 rounded hover:bg-green-50 cursor-pointer"><input type="checkbox" id="modMarketing" checked><span class="text-sm">营销推广</span></label>
+        <label class="flex items-center gap-2 p-2 bg-gray-50 rounded hover:bg-green-50 cursor-pointer"><input type="checkbox" id="modProduct" checked><span class="text-sm">产品交付</span></label>
+        <label class="flex items-center gap-2 p-2 bg-gray-50 rounded hover:bg-green-50 cursor-pointer"><input type="checkbox" id="modHr"><span class="text-sm">招聘与人事</span></label>
+        <label class="flex items-center gap-2 p-2 bg-gray-50 rounded hover:bg-green-50 cursor-pointer"><input type="checkbox" id="modLegal"><span class="text-sm">法务合规</span></label>
+        <label class="flex items-center gap-2 p-2 bg-gray-50 rounded hover:bg-green-50 cursor-pointer"><input type="checkbox" id="modOps"><span class="text-sm">日常运营</span></label>
+        <label class="flex items-center gap-2 p-2 bg-gray-50 rounded hover:bg-green-50 cursor-pointer"><input type="checkbox" id="modGrowth"><span class="text-sm">增长策略</span></label>
+      </div>
+    </div>
+
+    <!-- SOP 输出 -->
+    <div id="sopOutput" class="hidden space-y-4">
+      <div class="flex justify-between items-center">
+        <h2 class="text-xl font-bold"><i class="fa fa-file-text-o text-cyan-600"></i> 生成的SOP手册</h2>
+        <div class="flex gap-2">
+          <button onclick="saveSOP()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-sm"><i class="fa fa-save"></i> 保存</button>
+          <button onclick="openCostEstimator()" class="bg-amber-500 text-white px-4 py-2 rounded hover:bg-amber-600 text-sm"><i class="fa fa-calculator"></i> 成本估算</button>
+          <button onclick="exportMarkdown()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 text-sm"><i class="fa fa-download"></i> 导出Markdown</button>
+        </div>
+      </div>
+      <div id="sopContent"></div>
+    </div>
+
+    <!-- 已保存 -->
+    <div class="bg-white rounded-lg shadow p-6 mt-6">
+      <h2 class="font-bold text-lg mb-4"><i class="fa fa-history text-purple-600"></i> 已保存的SOP</h2>
+      <div id="savedList" class="space-y-2"></div>
+    </div>
+  </div>
+
+  <!-- 成本估算器模态框 -->
+  <div id="costModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl p-6 max-w-lg w-full mx-4 max-h-[85vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-bold text-amber-600"><i class="fa fa-calculator mr-2"></i>SOP成本估算</h3>
+        <button onclick="document.getElementById('costModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600"><i class="fa fa-times"></i></button>
+      </div>
+      <div id="costResult" class="space-y-4"></div>
+    </div>
+  </div>
+
+  <!-- 执行追踪模态框 -->
+  <div id="execModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl p-6 max-w-xl w-full mx-4 max-h-[85vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-bold text-cyan-600"><i class="fa fa-tasks mr-2"></i>SOP执行追踪</h3>
+        <button onclick="document.getElementById('execModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600"><i class="fa fa-times"></i></button>
+      </div>
+      <div id="execContent" class="space-y-4"></div>
+    </div>
+  </div>
+
+  <script>
+    let savedSOPs = JSON.parse(localStorage.getItem('sopSavedV2') || '[]');
+    let currentSOP = null;
+
+    const bizLabels = {
+      ecommerce: '电商/实物产品', service: '服务/咨询', content: '内容/自媒体',
+      tool: '工具/SaaS', education: '教育/培训', retail: '实体店/餐饮'
+    };
+    const stageLabels = { startup: '起步期', growth: '成长期', stable: '稳定期' };
+
+    const modules = {
+      cs: {
+        title: '客服与服务 SOP',
+        getContent: (biz, team, stage) => `## 客服与服务 SOP
+
+### 服务时间与响应标准
+- 工作时间（9:00-18:00）：${team <= 2 ? '30分钟内回复' : '15分钟内回复'}
+- 非工作时间：${biz === 'ecommerce' ? '设置自动回复+次日清晨处理' : biz === 'retail' ? '营业时间内即时响应' : biz === 'service' ? '紧急事项可联系紧急电话' : '次日统一回复'}
+- 紧急响应：${stage === 'stable' ? '7×24小时紧急联系通道' : '工作时间优先处理'}
+
+### 标准处理流程
+1. **接收**：通过${team <= 2 ? '微信+邮件+电话' : 'CRM系统+客服工具+工单系统'}接收
+2. **分类**：${biz === 'ecommerce' ? '售前咨询/订单查询/退换货/投诉建议' : biz === 'service' ? '项目咨询/报价/执行/售后' : biz === 'retail' ? '到店咨询/预约/投诉/建议' : '产品咨询/技术支持/反馈/合作'}
+3. **处理**：${team <= 1 ? '创始人亲自处理，复杂问题记录待办' : team <= 2 ? '专人负责，重大问题合伙人会商' : '一线客服→主管→创始人三级升级'}
+4. **记录**：建立${stage === 'startup' ? '简单的客户档案（Excel/飞书表格）' : '客户管理系统（CRM）'}，记录每次交互
+
+### 满意度管理
+- 每次服务后发送满意度评价
+- 每月汇总分析：好评率目标 > 90%
+- ${stage !== 'startup' ? '每季度NPS净推荐值调研' : '关注重复客户比例'}
+- 负面反馈必须在${team <= 2 ? '24h' : '12h'}内回复并跟进
+
+### FAQ 模板
+${biz === 'ecommerce' ? `Q: 多久发货？ → A: 48小时内发出，定制产品3-5个工作日
+Q: 如何退换货？ → A: 7天无理由退换，保证不影响二次销售
+Q: 运费谁承担？ → A: 质量问题我们承担，其他情况客户承担` : biz === 'service' ? `Q: 如何报价？ → A: 免费初诊→出具方案→正式报价
+Q: 服务周期多长？ → A: 根据项目规模1-4周不等
+Q: 售后有保障吗？ → A: 交付后30天内免费修改` : biz === 'education' ? `Q: 课程有效期？ → A: 购买后1年内可反复观看
+Q: 有退款政策吗？ → A: 开课7天内无条件退款
+Q: 有学习群吗？ → A: 购买后自动加入学员社群` : `Q: 有免费版吗？ → A: 提供14天免费试用
+Q: 如何升级？ → A: 在线自助升级，即时生效
+Q: 技术支持范围？ → A: 工作时间邮件+工单支持`}`
+      },
+      finance: {
+        title: '财务与账务 SOP',
+        getContent: (biz, team, stage) => `## 财务与账务 SOP
+
+### 日常记账
+- 工具：${team <= 2 ? 'Excel/简单账本/钱迹APP' : '在线会计软件（用友/金蝶/简道云）'}
+- 频次：每日记录收支，每周核对，每月结账
+- 分类体系：${biz === 'ecommerce' ? '采购成本/物流费用/营销支出/平台佣金/运营费用/人力成本' : biz === 'service' ? '项目收入/工具订阅/营销支出/人力成本/办公费用' : biz === 'retail' ? '进货成本/房租水电/人工工资/营销支出/杂费' : '服务器成本/营销支出/人力成本/工具订阅/办公费用'}
+
+### 收入管理
+- 收款渠道：${biz === 'ecommerce' ? '微信支付+支付宝+银行卡' : biz === 'service' ? '对公转账+微信+支付宝+合同分期' : '平台分成+微信收款+对公账户'}
+- 开票：${team <= 1 ? '使用电子税务局自行开票' : '财务/代账会计统一开票'}
+- 对账：每周核对一次，确保账实相符
+- 应收跟踪：${biz === 'service' ? '建立应收账款清单，超期3天自动提醒跟催' : '实时到账，每日核对'}
+
+### 成本控制
+- 固定成本红线：控制在月收入的${stage === 'startup' ? '40%' : stage === 'growth' ? '50%' : '60%'}以内
+- 营销ROI：低于1:3时立即复盘调整策略
+- 每月成本复盘：找出TOP3浪费源
+${stage !== 'startup' ? `- 建立预算制度：每月初制定预算，月末对比分析` : ''}
+
+### 税务管理
+${stage === 'startup' ? `- 个体户/小规模纳税人，每季度申报
+- 每月15日前完成上月税务申报
+- 保存所有票据和合同至少5年` : stage === 'growth' ? `- 申请一般纳税人资格
+- 聘请兼职/代账会计
+- 合理规划进项抵扣` : `- 专职财务或代账公司
+- 每季度财务审计
+- 税务筹划+合规申报并行`}
+
+### 现金流管理
+- 预留至少3个月运营资金作为安全垫
+- 大额支出（>月收入20%）需${team <= 1 ? '创始人' : '集体'}决策
+- 每周一检查现金流情况`
+      },
+      marketing: {
+        title: '营销推广 SOP',
+        getContent: (biz, team, stage) => `## 营销推广 SOP
+
+### 内容生产计划
+- 每周输出量：${biz === 'content' ? '5-7篇内容（图文+短视频）' : biz === 'ecommerce' ? '3-5条产品内容' : biz === 'service' ? '2-3篇专业文章/案例' : biz === 'education' ? '3-5条教育内容' : '2-3条品牌内容'}
+- 内容形式：${biz === 'content' ? '图文+短视频+长文' : biz === 'retail' ? '探店视频+产品展示+口碑内容' : '专业文章+案例+视频'}
+- 分发矩阵：${team <= 2 ? '重点做1-2个平台（如小红书+微信）' : '全平台矩阵：公众号+小红书+抖音+知乎+视频号'}
+- 内容日历：每月初制定本月内容排期表
+
+### 获客漏斗
+1. **曝光层**：内容营销+SEO+社交媒体+口碑推荐
+2. **互动层**：评论回复+私信引导+免费资料/体验
+3. **转化层**：${biz === 'ecommerce' ? '限时优惠+满减+赠品' : biz === 'service' ? '免费咨询→方案演示→签约转化' : biz === 'education' ? '试听课→体验营→正价课' : '免费试用→功能演示→付费升级'}
+4. **裂变层**：推荐有礼+分销裂变+社群快闪
+
+### 付费投放
+- ${stage === 'startup' ? '先做免费流量跑通模型，稳定后再投放' : stage === 'growth' ? '小规模测试，ROI>3后逐步放量' : '建立稳定投放模型，月度预算占比<总收入20%'}
+- 关键指标：CPC（单次点击成本）< ${biz === 'ecommerce' ? '¥2' : '¥5'}，CAC（获客成本）< LTV/3
+
+### 数据跟踪
+- 日报：流量/转化/订单/客单价
+- 周报：各渠道ROI对比+内容表现TOP5
+- 月报：增长趋势+客户画像+竞品动态
+${stage !== 'startup' ? '- 季度：全年营销策略回顾与调整' : ''}
+
+### 工具清单
+- 数据分析：Google Analytics + 各平台后台数据
+- 设计：Canva/稿定设计
+- 排期：飞书多维表格/Notion
+- 社群管理：企业微信/微信群`
+      },
+      product: {
+        title: '产品与服务交付 SOP',
+        getContent: (biz, team, stage) => `## 产品与服务交付 SOP
+
+### 产品体系
+- 产品线设计：${biz === 'ecommerce' ? '引流款（低价获客）+利润款（核心收入）+形象款（品牌调性）' : biz === 'service' ? '基础服务（标准化）+增值服务（高利润）+定制服务（品牌）' : biz === 'content' ? '免费内容（引流）+付费专栏（核心）+咨询服务（高客单）' : biz === 'education' ? '免费试听（引流）+系统课程（核心）+1v1辅导（高端）' : '基础版（免费引流）+专业版（核心收入）+企业版（高客单）'}
+- 迭代周期：${stage === 'startup' ? '每周小迭代，快速验证' : '双周迭代，稳定输出'}
+- 需求来源：用户反馈+数据分析+竞品调研+行业趋势
+
+### 交付流程
+1. **确认需求**：与客户/用户确认交付物、时间、标准
+2. **执行生产**：${biz === 'ecommerce' ? '采购/生产→质检→包装→发货' : biz === 'service' ? '方案制定→分阶段执行→中期汇报→终版交付' : '创作→编辑→审核→发布'}
+3. **质量检查**：${biz === 'ecommerce' ? '出货前100%质检，抽检不合格率<2%' : biz === 'service' ? '内部审核+客户逐项验收' : '内容三审制：自审→互审→终审'}
+4. **交付确认**：客户签字/确认收货
+5. **复盘改进**：数据复盘+问题汇总+流程优化
+
+### 质量标准
+- ${biz === 'ecommerce' ? '合格率>98%，客户满意度>95%' : biz === 'service' ? '准时交付率>95%，客户满意度>90%' : '内容准确率100%，无事实性错误'}
+- ${stage !== 'startup' ? '建立标准化检查清单（Checklist）' : '核心环节建立SOP'}
+- 客户投诉率目标<${stage === 'startup' ? '5%' : '3%'}
+
+### 供应链管理
+${biz === 'ecommerce' ? `- 供应商评估四维度：质量/价格/交期/服务
+- 安全库存：畅销品维持2周销量
+- 物流：对比2-3家快递公司，按月考核` : biz === 'retail' ? `- 食材/原材料：每日新鲜采购，固定供应商
+- 库存管理：先进先出，每日盘点
+- 损耗控制：损耗率<3%` : biz === 'service' ? `- 合作资源库：设计师/写手/开发等自由职业者
+- 合作流程：评估→试用→长期合作→分成标准化
+- 紧急替代：每个关键角色至少1个备选` : `- 工具/平台依赖管理
+- 数据备份：每日自动备份到云端
+- 内容资产：所有素材分类归档`}`
+      },
+      hr: {
+        title: '招聘与人事 SOP',
+        getContent: (biz, team, stage) => `## 招聘与人事 SOP
+
+### 招聘流程
+- 招聘渠道：${team <= 2 ? '朋友圈+社群推荐+BOSS直聘' : 'BOSS直聘+脉脉+内推+猎头'}
+- 面试流程：简历筛选→初面（电话/视频）→终面（现场/项目测试）→Offer
+- 试用期：${stage === 'startup' ? '1个月快速考察' : '2-3个月全面评估'}
+- 招聘标准：能力匹配度>文化契合度>成长潜力
+
+### 岗位职责
+- 一人公司时期：创始人需要掌握核心技能+外包非核心业务
+- 首次招聘：优先招${biz === 'ecommerce' ? '客服/运营' : biz === 'content' ? '助理/编辑' : '销售/交付'}岗位
+- 远程管理：使用飞书/企业微信+每周站会+OKR对齐
+
+### 绩效管理
+- 考核周期：${stage === 'startup' ? '月度复盘' : stage === 'growth' ? '双月Review' : '季度OKR'}
+- 核心指标：${biz === 'ecommerce' ? '销售额/利润率/客户满意度' : biz === 'service' ? '项目交付量/客户满意度/复购率' : '内容产出量/用户增长/收入'}
+- 反馈机制：每周1v1沟通，每月正式Review
+
+### 文化建设
+- 远程团队：每日早会+每周团建（线上游戏/分享会）
+- 价值观：用户第一+结果导向+坦诚沟通
+${stage !== 'startup' ? '- 建立员工成长计划和培训体系' : ''}`
+      },
+      legal: {
+        title: '法务合规 SOP',
+        getContent: (biz, team, stage) => `## 法务合规 SOP
+
+### 合同管理
+- 标准合同模板：${biz === 'service' ? '服务合同/保密协议/外包合同/合作协议' : biz === 'ecommerce' ? '供货合同/物流合同/分销协议/退换货政策' : '用户协议/隐私政策/合作协议/授权书'}
+- 合同审批：${team <= 1 ? '使用模板自行生成，重要合同请律师审核' : '业务负责人→法务顾问→创始人签字'}
+- 合同存档：所有合同编号存档，电子版+纸质版双备份
+
+### 知识产权
+- ${biz === 'content' ? '内容原创保护：所有原创内容标注版权，关键内容申请著作权登记' : biz === 'tool' ? '软件著作权申请+商标注册+开源协议选择' : '商标注册（品牌名+Logo）+域名保护'}
+- 他方内容使用：严格遵循授权范围，标注来源
+
+### 合规检查清单
+- 税务合规：按时申报，不偷税漏税
+- 数据合规：${biz === 'tool' || biz === 'ecommerce' ? '用户信息保护+数据加密+隐私政策公开透明' : '客户信息保密+不得泄露'}
+- 广告合规：不使用极限用语（第一/最好/绝对），内容真实不夸大
+- 劳动合规：${team > 1 ? '签署劳动合同+缴纳社保+加班费合规' : '个体工商户合规经营'}
+
+### 风险防范
+- 购买专业责任险/产品责任险（建议）
+- ${stage !== 'startup' ? '每季度法律合规自查' : '每年至少一次全面法律审查'}
+- 重大决策前咨询专业律师`
+      },
+      ops: {
+        title: '日常运营 SOP',
+        getContent: (biz, team, stage) => `## 日常运营 SOP
+
+### 每日流程
+- 早上（30min）：查看消息→检查数据→确认今日任务优先级
+- 中午（1h）：深度工作/核心产出
+- 下午（2h）：客户沟通+交付执行+团队协作
+- 傍晚（30min）：数据记录+明日计划+复盘
+
+### 工具栈
+- 沟通：企业微信/飞书/微信
+- 项目管理：飞书多维表格/Notion/Trello
+- 文档：飞书文档/腾讯文档/Notion
+- 数据：Excel/Airtable/各平台后台
+- 设计：Canva/稿定设计/创客贴
+
+### 效率提升
+- 时间管理：番茄工作法（25min专注+5min休息）
+- 批量处理：同类型任务集中处理
+- 自动化：${team <= 2 ? '使用自动化工具（Zapier/集简云）减少重复操作' : '建立标准操作流程+工具自动化'}
+- 外包策略：非核心业务通过猪八戒/Fiverr/Upwork外包
+
+### 数据管理
+- 核心数据：每日更新，至少保留${stage === 'startup' ? '6个月' : '2年'}历史
+- 备份策略：本地+云端双备份，每周检验恢复
+- 信息安全：${team > 1 ? '权限分级管理，离职即回收账号' : '使用密码管理器，开启双重认证'}`
+      },
+      growth: {
+        title: '增长策略 SOP',
+        getContent: (biz, team, stage) => `## 增长策略 SOP
+
+### 增长飞轮
+1. **内容驱动**：持续输出价值内容吸引精准用户
+2. **产品驱动**：通过产品体验本身带来口碑传播
+3. **服务驱动**：超预期服务带来复购和转介绍
+4. **系统驱动**：建立可复用的增长系统
+
+### 获客渠道矩阵
+- 内容平台：公众号/小红书/抖音/知乎/B站（选2-3个深耕）
+- 私域：个人微信号/企业微信+社群+朋友圈
+- 合作：异业合作+KOL/KOC分销+联名活动
+- 付费：信息流广告+搜索广告+KOL投放
+
+### 留存策略
+- 新用户：${biz === 'ecommerce' ? '首单优惠+复购提醒+积分体系' : biz === 'service' ? '交付后回访+定期咨询服务+年度体检' : '新手引导+定期回访+价值内容推送'}
+- 老用户：会员体系+专属权益+老客专享价
+- 流失预警：${stage !== 'startup' ? '建立流失预测模型，设置预警阈值' : '关注活跃度下降趋势，主动回访'}
+
+### 增长实验
+- 每周至少进行1个小实验（标题A/B测试/活动形式/定价策略）
+- 每个实验：假设→执行→数据→结论
+- 每月总结：哪些有效、哪些无效、下一步方向
+
+### 关键指标
+- 北极星指标：${biz === 'ecommerce' ? '月活跃买家数' : biz === 'service' ? '月签约项目数' : biz === 'content' ? '月活跃读者数' : biz === 'education' ? '完课率+续费率' : '月活跃用户数（MAU）'}
+- 核心监控：CAC/LTV/复购率/转化率/客单价`
+      }
+    };
+
+    function generateSOP() {
+      const biz = document.getElementById('bizType').value;
+      const team = document.getElementById('teamSize').value;
+      const stage = document.getElementById('stage').value;
+      const company = document.getElementById('companyName').value.trim() || '我的工作室';
+
+      const selectedMods = ['cs','finance','marketing','product','hr','legal','ops','growth']
+        .filter(id => document.getElementById('mod' + id.charAt(0).toUpperCase() + id.slice(1)).checked);
+
+      const content = selectedMods.map(id => modules[id].getContent(biz, team, stage)).join('\n\n---\n\n');
+
+      currentSOP = { id: Date.now(), company, biz, team, stage, date: new Date().toLocaleString(), content, moduleCount: selectedMods.length };
+
+      document.getElementById('sopOutput').classList.remove('hidden');
+      document.getElementById('sopContent').innerHTML = `
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="text-2xl font-bold text-cyan-700 mb-1">${company} - 运营SOP手册</div>
+          <div class="text-sm text-gray-500 mb-4">${bizLabels[biz]} | ${team}人 | ${stageLabels[stage]} | ${selectedMods.length}个模块 | ${currentSOP.date}</div>
+          <div class="prose max-w-none text-sm leading-relaxed">${renderContent(content)}</div>
+        </div>`;
+
+      window.sopMarkdown = `# ${company} - 运营SOP手册\n\n**业务类型**: ${bizLabels[biz]} | **团队规模**: ${team}人 | **发展阶段**: ${stageLabels[stage]} | **生成日期**: ${currentSOP.date}\n\n---\n\n${content}\n\n---\n\n*由一人公司SOP生成器 v2 自动生成*`;
+      window.scrollTo({ top: document.getElementById('sopOutput').offsetTop - 20, behavior: 'smooth' });
+    }
+
+    function renderContent(md) {
+      return md
+        .split('\n').map(line => {
+          if (line.startsWith('### ')) return `<h3 class="font-bold text-cyan-700 mt-4 mb-2">${line.slice(4)}</h3>`;
+          if (line.startsWith('## ')) return `<h2 class="font-bold text-lg mt-5 mb-2 text-gray-800 border-b pb-1">${line.slice(3)}</h2>`;
+          if (line.startsWith('1. **') || line.startsWith('2. **') || line.startsWith('3. **') || line.startsWith('4. **')) {
+            const num = line.match(/^\d+/)[0];
+            const rest = line.replace(/^\d+\.\s\*\*(.+?)\*\*/, '<strong>$1</strong>');
+            return `<div class="ml-2 mt-1"><span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-cyan-100 text-cyan-700 text-xs font-bold mr-1">${num}</span>${rest}</div>`;
+          }
+          if (line.startsWith('- ')) return `<li class="ml-4 text-gray-700">${line.slice(2)}</li>`;
+          if (line.startsWith('Q: ')) return `<div class="bg-yellow-50 p-2 rounded mt-1 text-sm"><strong>${line.replace('→', '→').match(/Q: (.+?)→/)?.[1] || line.slice(3)}</strong> → ${line.split('→').slice(1).join('→')}</div>`;
+          if (line.trim() === '') return '<div class="h-2"></div>';
+          return `<p class="text-gray-700">${line}</p>`;
+        }).join('\n');
+    }
+
+    function saveSOP() {
+      if (!currentSOP) return;
+      savedSOPs.unshift(currentSOP);
+      if (savedSOPs.length > 30) savedSOPs.pop();
+      localStorage.setItem('sopSavedV2', JSON.stringify(savedSOPs));
+      renderSaved();
+      alert('SOP已保存');
+    }
+
+    function exportMarkdown() {
+      if (!window.sopMarkdown) return;
+      const blob = new Blob([window.sopMarkdown], { type: 'text/markdown;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${currentSOP.company}_运营SOP_${new Date().toISOString().slice(0,10)}.md`;
+      a.click();
+    }
+
+    function renderSaved() {
+      const list = document.getElementById('savedList');
+      list.innerHTML = savedSOPs.length === 0 ? '<div class="text-gray-400 text-center py-6">暂无保存的SOP</div>' :
+        savedSOPs.map((s, i) => `<div class="flex justify-between items-center p-3 bg-gray-50 rounded hover:bg-gray-100">
+          <div><span class="font-medium">${s.company}</span> <span class="text-xs text-gray-400">${bizLabels[s.biz]||s.biz} | ${s.moduleCount}模块 | ${s.date}</span></div>
+          <div class="flex gap-2"><button onclick="loadSaved(${i})" class="text-blue-500 text-sm hover:underline"><i class="fa fa-eye"></i></button><button onclick="deleteSaved(${i})" class="text-red-400 hover:text-red-600"><i class="fa fa-trash"></i></button></div>
+        </div>`).join('');
+    }
+
+    function loadSaved(idx) {
+      currentSOP = savedSOPs[idx];
+      document.getElementById('sopOutput').classList.remove('hidden');
+      document.getElementById('sopContent').innerHTML = `<div class="bg-white rounded-lg shadow p-6">
+        <div class="text-2xl font-bold text-cyan-700 mb-1">${currentSOP.company} - 运营SOP手册</div>
+        <div class="text-sm text-gray-500 mb-4">${bizLabels[currentSOP.biz]||currentSOP.biz} | ${currentSOP.team}人 | ${stageLabels[currentSOP.stage]||currentSOP.stage} | ${currentSOP.date}</div>
+        <div class="prose max-w-none text-sm leading-relaxed">${renderContent(currentSOP.content)}</div>
+      </div>`;
+      window.sopMarkdown = currentSOP.content;
+      window.scrollTo({ top: document.getElementById('sopOutput').offsetTop - 20, behavior: 'smooth' });
+    }
+
+    function deleteSaved(idx) { savedSOPs.splice(idx, 1); localStorage.setItem('sopSavedV2', JSON.stringify(savedSOPs)); renderSaved(); }
+
+    // ============================================================
+    // 成本估算模块
+    // ============================================================
+    var COST_RATES = {
+      ecommerce: { monthlyHours: 160, avgWage: 8000, tools: 500, marketing: 2000 },
+      service: { monthlyHours: 120, avgWage: 12000, tools: 300, marketing: 1500 },
+      content: { monthlyHours: 80, avgWage: 10000, tools: 200, marketing: 1000 },
+      tool: { monthlyHours: 200, avgWage: 15000, tools: 800, marketing: 3000 },
+      education: { monthlyHours: 100, avgWage: 12000, tools: 400, marketing: 2500 },
+      retail: { monthlyHours: 180, avgWage: 6000, tools: 600, marketing: 2000 }
+    };
+
+    var STAGE_MULTIPLIER = { startup: 0.6, growth: 1.0, stable: 1.2 };
+
+    function openCostEstimator() {
+      if (!currentSOP) { alert('请先生成SOP'); return; }
+
+      var biz = currentSOP.biz;
+      var team = parseInt(currentSOP.team) || 1;
+      var stage = currentSOP.stage;
+      var modules = currentSOP.moduleCount || 4;
+
+      var rates = COST_RATES[biz] || COST_RATES.ecommerce;
+      var mult = STAGE_MULTIPLIER[stage] || 1;
+
+      var laborCost = team * rates.avgWage * rates.monthlyHours / 160 * mult;
+      var toolCost = team * rates.tools * mult;
+      var marketingCost = rates.marketing * mult * modules / 4;
+      var miscCost = laborCost * 0.1;
+      var totalMonthly = laborCost + toolCost + marketingCost + miscCost;
+
+      var el = document.getElementById('costResult');
+      el.innerHTML =
+        '<div class="grid grid-cols-2 gap-3 mb-4">' +
+          '<div class="bg-cyan-50 rounded p-3"><div class="text-xs text-cyan-600">人力成本</div><div class="font-bold text-cyan-700">¥' + Math.round(laborCost).toLocaleString() + '/月</div></div>' +
+          '<div class="bg-blue-50 rounded p-3"><div class="text-xs text-blue-600">工具成本</div><div class="font-bold text-blue-700">¥' + Math.round(toolCost).toLocaleString() + '/月</div></div>' +
+          '<div class="bg-green-50 rounded p-3"><div class="text-xs text-green-600">营销成本</div><div class="font-bold text-green-700">¥' + Math.round(marketingCost).toLocaleString() + '/月</div></div>' +
+          '<div class="bg-gray-50 rounded p-3"><div class="text-xs text-gray-600">杂项成本</div><div class="font-bold text-gray-700">¥' + Math.round(miscCost).toLocaleString() + '/月</div></div>' +
+        '</div>' +
+        '<div class="text-center p-4 bg-amber-50 rounded mb-4">' +
+          '<div class="text-2xl font-bold text-amber-600">¥' + Math.round(totalMonthly).toLocaleString() + '</div>' +
+          '<div class="text-sm text-amber-500">预估月度运营成本（' + team + '人团队）</div>' +
+        '</div>' +
+        '<div class="bg-gray-50 rounded p-4 text-sm">' +
+          '<div class="font-bold mb-2">成本分解说明</div>' +
+          '<ul class="space-y-1 text-gray-600">' +
+            '<li>人力成本：' + team + '人 × ¥' + rates.avgWage.toLocaleString() + '平均薪资 × ' + mult + '阶段系数</li>' +
+            '<li>工具成本：软件订阅+服务费用（' + team + '人）</li>' +
+            '<li>营销成本：根据SOP模块数量（' + modules + '个）估算</li>' +
+            '<li>杂项成本：约占人力成本10%（办公+交通）</li>' +
+          '</ul>' +
+        '</div>' +
+        '<div class="mt-4 text-xs text-amber-600 bg-amber-50 p-3 rounded">' +
+          '<i class="fa fa-info-circle mr-1"></i>此为粗略估算，实际成本因地区、具体需求等因素有较大差异' +
+        '</div>';
+
+      document.getElementById('costModal').classList.remove('hidden');
+    }
+
+    // ============================================================
+    // SOP执行追踪
+    // ============================================================
+    var EXEC_PROGRESS_KEY = 'sop_exec_progress';
+
+    function openExecTracker() {
+      if (!currentSOP) { alert('请先生成SOP'); return; }
+
+      var progress = getExecProgress(currentSOP.id);
+      var modules = ['cs','finance','marketing','product','hr','legal','ops','growth'].filter(function(id) { return document.getElementById('mod' + id.charAt(0).toUpperCase() + id.slice(1)).checked; });
+
+      var el = document.getElementById('execContent');
+      var completed = progress.completed || [];
+      var total = modules.length;
+      var pct = total > 0 ? Math.round(completed.length / total * 100) : 0;
+
+      el.innerHTML =
+        '<div class="mb-4">' +
+          '<div class="flex justify-between text-sm mb-1"><span>整体进度</span><span class="font-bold">' + pct + '%</span></div>' +
+          '<div class="w-full bg-gray-200 rounded h-4"><div class="bg-cyan-500 h-4 rounded transition-all" style="width:' + pct + '%"></div></div>' +
+        '</div>' +
+        '<div class="space-y-2">' +
+        modules.map(function(m) {
+          var isDone = completed.indexOf(m) >= 0;
+          return '<div class="flex items-center justify-between p-3 rounded border ' + (isDone ? 'bg-green-50 border-green-300' : 'bg-gray-50') + '">' +
+            '<div class="flex items-center gap-2">' +
+              '<input type="checkbox" ' + (isDone ? 'checked' : '') + ' onchange="toggleExecModule(\'' + m + '\')">' +
+              '<span class="text-sm ' + (isDone ? 'text-green-700 font-medium' : 'text-gray-700') + '">' + modules[m] || m + '</span>' +
+            '</div>' +
+            '<span class="text-xs ' + (isDone ? 'text-green-600' : 'text-gray-400') + '">' + (isDone ? '已完成' : '待执行') + '</span>' +
+          '</div>';
+        }).join('') +
+        '</div>' +
+        '<button onclick="resetExecProgress()" class="mt-4 text-sm text-gray-500 hover:text-red-500"><i class="fa fa-refresh mr-1"></i>重置进度</button>';
+
+      document.getElementById('execModal').classList.remove('hidden');
+    }
+
+    function getExecProgress(sopId) {
+      try {
+        var all = JSON.parse(localStorage.getItem(EXEC_PROGRESS_KEY)) || {};
+        return all[sopId] || { completed: [] };
+      } catch(e) { return { completed: [] }; }
+    }
+
+    function toggleExecModule(moduleId) {
+      if (!currentSOP) return;
+      var all = JSON.parse(localStorage.getItem(EXEC_PROGRESS_KEY)) || {};
+      var progress = all[currentSOP.id] || { completed: [] };
+      var idx = progress.completed.indexOf(moduleId);
+      if (idx >= 0) progress.completed.splice(idx, 1);
+      else progress.completed.push(moduleId);
+      all[currentSOP.id] = progress;
+      localStorage.setItem(EXEC_PROGRESS_KEY, JSON.stringify(all));
+      openExecTracker();
+    }
+
+    function resetExecProgress() {
+      if (!currentSOP) return;
+      var all = JSON.parse(localStorage.getItem(EXEC_PROGRESS_KEY)) || {};
+      all[currentSOP.id] = { completed: [] };
+      localStorage.setItem(EXEC_PROGRESS_KEY, JSON.stringify(all));
+      openExecTracker();
+    }
+
+    renderSaved();
+  </script>
+</body>
+</html>
